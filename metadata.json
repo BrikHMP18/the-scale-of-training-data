@@ -1,0 +1,5 @@
+{
+  "name": "GPT Token Scale",
+  "description": "Visualizing the scale of training data from GPT-1 to GPT-5 using token counts.",
+  "requestFramePermissions": []
+}
