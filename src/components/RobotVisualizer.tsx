@@ -73,19 +73,20 @@ const datasets: RobotDataset[] = [
     hours: 4000,
     description: '~4,000 Hours',
     hoursEstimated: true,
-    dataCategory: 'human-actions',
-    dataTypeLabel: 'Human (w/ actions)',
-    objective: 'Policy (IL)',
-    trajectories: 'n/a',
-    diversity: 'Multi-task',
-    institution: 'DeepMind',
+    dataCategory: 'robot-auto',
+    dataTypeLabel: 'Mixed (RL + self-gen)',
+    objective: 'Self-improving policy',
+    trajectories: 'millions (self-gen)',
+    diversity: '253 task variations',
+    institution: 'Google DeepMind',
+    mixNote: 'Bulk of data is RL/self-generated; human teleop is only the seed (~100–1k demos/task)',
   },
   {
     name: 'π0',
     year: '2024',
     hours: 10000,
     description: '~10,000 Hours',
-    hoursEstimated: false,
+    hoursEstimated: true,
     dataCategory: 'robot-teleop',
     dataTypeLabel: 'Robot (w/ actions)',
     objective: 'Policy + foundation',
@@ -119,7 +120,7 @@ const datasets: RobotDataset[] = [
     trajectories: 'n/a',
     diversity: 'Homes, warehouses, factories',
     institution: 'Generalist AI',
-    mixNote: 'Scaling laws for robotics — 10k+ new hours/week',
+    mixNote: 'Self-reported blog post (Nov 2025); no peer-reviewed paper. 10k+ new hours/week claimed.',
   },
 ];
 
@@ -128,9 +129,11 @@ const GAP = 1; // px
 const TOTAL_CELL_SIZE = SQUARE_SIZE + GAP;
 const PORTRAIT_RATIO = 4;
 const LABEL_MIN_WIDTH = 144; // px — matches w-36
+const HOURS_PER_SQUARE = 10;
 
 function getColumnWidth(hours: number): number {
-  const cols = Math.max(1, Math.ceil(Math.sqrt(hours / PORTRAIT_RATIO)));
+  const squares = Math.ceil(hours / HOURS_PER_SQUARE);
+  const cols = Math.max(1, Math.ceil(Math.sqrt(squares / PORTRAIT_RATIO)));
   const canvasWidth = cols * TOTAL_CELL_SIZE;
   return Math.max(canvasWidth, LABEL_MIN_WIDTH);
 }
@@ -146,8 +149,9 @@ const GridCanvas = ({ hours }: { hours: number }) => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const cols = Math.max(1, Math.ceil(Math.sqrt(hours / PORTRAIT_RATIO)));
-    const rows = Math.ceil(hours / cols);
+    const squares = Math.ceil(hours / HOURS_PER_SQUARE);
+    const cols = Math.max(1, Math.ceil(Math.sqrt(squares / PORTRAIT_RATIO)));
+    const rows = Math.ceil(squares / cols);
 
     const width = cols * TOTAL_CELL_SIZE;
     const height = rows * TOTAL_CELL_SIZE;
@@ -161,7 +165,7 @@ const GridCanvas = ({ hours }: { hours: number }) => {
     ctx.scale(dpr, dpr);
     ctx.fillStyle = color;
 
-    for (let i = 0; i < hours; i++) {
+    for (let i = 0; i < squares; i++) {
       const col = i % cols;
       const row = Math.floor(i / cols);
       const x = col * TOTAL_CELL_SIZE;
@@ -183,7 +187,7 @@ export default function RobotVisualizer() {
         </h1>
         <p className="text-base md:text-xl text-slate-600 max-w-2xl font-light">
           Visualizing the growth of robot training datasets from early lab collections to web-scale human video.
-          Each square represents <span className="font-bold text-slate-900">1 Hour</span> of demonstration data.
+          Each square represents <span className="font-bold text-slate-900">10 Hours</span> of demonstration data.
         </p>
         <p className="text-xs md:text-sm text-slate-400 mt-3 md:mt-4 flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
@@ -227,8 +231,8 @@ export default function RobotVisualizer() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
                   <div className="w-36 mx-auto text-center">
-                    <h2 className="text-3xl font-bold mb-1">{dataset.name}</h2>
-                    <div className="text-lg font-semibold mb-2">{dataset.description}</div>
+                    <h2 className="text-xl font-bold mb-1">{dataset.name}</h2>
+                    <div className="text-sm font-semibold mb-2">{dataset.description}</div>
                     <div className="flex items-center justify-center gap-1.5 mb-4">
                       <span className="text-[10px] text-slate-400">{dataset.year}</span>
                       {dataset.hoursEstimated ? (
@@ -287,13 +291,12 @@ export default function RobotVisualizer() {
           <span className="font-semibold text-slate-600">Hours sourcing:</span>{' '}
           <span className="font-mono text-green-700 bg-green-50 border border-green-200 px-1 rounded">Reported</span> — figure taken directly from the paper or dataset release.{' '}
           <span className="font-mono bg-slate-100 text-slate-500 px-1 rounded">Est.</span> — estimated from trajectory count × average episode duration (typically 10–30 s); treat as order-of-magnitude.
-          π0 mixes OXE, DROID, and BridgeData V2; hours reflect combined pretraining scale.
+          π0 mixes OXE, DROID, and BridgeData V2; hours converted from 903M timesteps ("around 10,000 hours" per paper). GEN-0 hours are self-reported by Generalist AI; no peer-reviewed paper.
         </p>
         <p>
           <span className="font-semibold text-slate-600">Data type note:</span>{' '}
-          <span className="font-mono text-slate-500">Robot (auto-label)</span> — autonomous collection with synthetic labels.{' '}
+          <span className="font-mono text-slate-500">Mixed (RL + self-gen)</span> — RL agent data + self-generated rollouts; human teleop is seed only (RoboCat).{' '}
           <span className="font-mono text-slate-500">Robot (w/ actions)</span> — human teleop with proprioceptive action labels.{' '}
-          <span className="font-mono text-slate-500">Human (w/ actions)</span> — human demos with action labels (more scalable collection).{' '}
           <span className="font-mono text-slate-500">Human (no actions)</span> — raw video only; latent actions inferred post-hoc. Not directly comparable: 10k h robot ≠ 10k h human video in information density.
         </p>
         <p className="text-slate-400">

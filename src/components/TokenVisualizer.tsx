@@ -200,8 +200,8 @@ export default function TokenVisualizer() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
                 <div className="w-36 mx-auto text-center">
-                  <h2 className="text-3xl font-bold mb-1">{model.name}</h2>
-                  <div className="text-lg font-semibold mb-4">{model.description}</div>
+                  <h2 className="text-xl font-bold mb-1">{model.name}</h2>
+                  <div className="text-sm font-semibold mb-4">{model.description}</div>
 
                   <div className="border-t border-slate-200 pt-3 space-y-3 text-left">
                     <div>
