@@ -1,5 +1,9 @@
 # The Scale of Robot Learning Data
 
+**Live site: https://brikhmp18.github.io/the-scale-of-robot-learning-data/**
+
+[![The Scale of Robot Learning Data — waffle chart of reported training hours per release](./docs/robot-learning-data-visualization.png)](https://brikhmp18.github.io/the-scale-of-robot-learning-data/)
+
 Interactive visualization of author-reported training-data scale across a curated, non-exhaustive selection of robot-learning releases. Each rendered square represents **1,000 reported hours**; a partial square is proportional.
 
 ## Research releases
